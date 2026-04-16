@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
-import { alpha } from '@mui/material/styles';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { glass } from '../theme';
 import { api } from '../utils/api';
 
@@ -49,6 +49,10 @@ export default function ProjectsPage({ onNavigate = () => {} }) {
     onNavigate(`/editor?projectId=${projectId}`);
   };
 
+  const viewProject = (projectId) => {
+    onNavigate(`/viewer?projectId=${projectId}`);
+  };
+
   const removeProject = async (projectId) => {
     try {
       await api.delete(`/api/projects/${projectId}`);
@@ -63,7 +67,7 @@ export default function ProjectsPage({ onNavigate = () => {} }) {
       <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 2.5 }}>
         <Box>
           <Typography variant="h4" sx={{ fontSize: { xs: 28, md: 36 }, fontWeight: 800 }}>Projects</Typography>
-          <Typography color="text.secondary">Open a saved camera plan and continue editing it in the Editor tab.</Typography>
+          <Typography color="text.secondary">Open a saved camera plan in the Editor or review it in Viewer mode.</Typography>
         </Box>
         <Button variant="outlined" onClick={loadProjects}>Refresh</Button>
       </Stack>
@@ -104,7 +108,10 @@ export default function ProjectsPage({ onNavigate = () => {} }) {
                   </Typography>
                 </Box>
 
-                <Stack direction="row" spacing={1}>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  <Button variant="outlined" startIcon={<VisibilityRoundedIcon />} onClick={() => viewProject(project.id)}>
+                    Open in Viewer
+                  </Button>
                   <Button variant="contained" startIcon={<OpenInNewRoundedIcon />} onClick={() => openProject(project.id)}>
                     Open in Editor
                   </Button>

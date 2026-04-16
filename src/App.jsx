@@ -12,6 +12,7 @@ import { alpha } from '@mui/material/styles';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectsPage from './pages/ProjectsPage';
+import ViewerPage from './pages/ViewerPage';
 import { useAuth } from './context/AuthContext';
 
 const NAV_ITEMS = [
@@ -49,7 +50,7 @@ function PlaceholderPage({ title, description, onNavigate }) {
           <CardContent sx={{ p: 4 }}>
             <Typography variant="h4" sx={{ mb: 1.5 }}>{title}</Typography>
             <Typography color="text.secondary" sx={{ mb: 3 }}>{description}</Typography>
-            <Typography color="text.secondary">This page is now routed and ready, so you can build it later without changing the URL structure again.</Typography>
+            <Typography color="text.secondary">This page is routed and ready, so you can build it later without changing the URL structure again.</Typography>
           </CardContent>
         </Card>
       </Box>
@@ -81,6 +82,7 @@ export default function App() {
   const page = useMemo(() => {
     if (route.pathname.startsWith('/admin')) return 'admin';
     if (route.pathname.startsWith('/projects')) return 'projects';
+    if (route.pathname.startsWith('/viewer')) return 'viewer';
     return 'editor';
   }, [route.pathname]);
 
@@ -100,6 +102,10 @@ export default function App() {
 
   if (page === 'projects') {
     return <ProjectsPage onNavigate={navigateTo} />;
+  }
+
+  if (page === 'viewer') {
+    return <ViewerPage search={route.search} onNavigate={navigateTo} />;
   }
 
   return <DashboardPage pathname={route.pathname} search={route.search} onNavigate={navigateTo} />;
