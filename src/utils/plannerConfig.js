@@ -56,11 +56,7 @@ export function createCamera(index = 0) {
     fov: 50,
     mirror: false,
     locked: false,
-    operator: '',
-    channel: '',
-    ccu: '',
-    loc: '',
-    link: ''
+    loc: ''
   };
 }
 
