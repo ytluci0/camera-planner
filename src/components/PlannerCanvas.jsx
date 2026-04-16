@@ -13,6 +13,7 @@ function getConeAngle(camera) {
 
 export default function PlannerCanvas({ sport = 'football', cameras = [], selectedId, setSelectedId, setCameras, scale = 1 }) {
   const ref = useRef(null);
+  const previewRef = useRef(null);
   const preset = SPORT_PRESETS[sport] || SPORT_PRESETS.football;
   const dragRef = useRef({ id: null, pointerId: null, frame: null, lastClientX: 0, lastClientY: 0 });
   const [dragPreview, setDragPreview] = useState(null);
@@ -35,7 +36,8 @@ export default function PlannerCanvas({ sport = 'football', cameras = [], select
     dragRef.current.frame = null;
     const point = eventToPercent(dragRef.current.lastClientX, dragRef.current.lastClientY);
     if (!point || !dragRef.current.id) return;
-    setDragPreview({ id: dragRef.current.id, ...point });
+    previewRef.current = { id: dragRef.current.id, ...point };
+    setDragPreview(previewRef.current);
   };
 
   const handleWindowPointerMove = (event) => {
@@ -47,20 +49,29 @@ export default function PlannerCanvas({ sport = 'football', cameras = [], select
     }
   };
 
-  const stopDragging = () => {
+  const stopDragging = (event) => {
     const { id } = dragRef.current;
+
+    if (event && dragRef.current.id) {
+      dragRef.current.lastClientX = event.clientX;
+      dragRef.current.lastClientY = event.clientY;
+    }
+
     if (dragRef.current.frame) {
       window.cancelAnimationFrame(dragRef.current.frame);
       dragRef.current.frame = null;
     }
 
-    if (id && dragPreview) {
+    const finalPoint = id ? eventToPercent(dragRef.current.lastClientX, dragRef.current.lastClientY) || previewRef.current : null;
+
+    if (id && finalPoint) {
       setCameras((prev) => prev.map((cam) => (
-        cam.id === id && !cam.locked ? { ...cam, x: dragPreview.x, y: dragPreview.y } : cam
+        cam.id === id && !cam.locked ? { ...cam, x: finalPoint.x, y: finalPoint.y } : cam
       )));
     }
 
     dragRef.current = { id: null, pointerId: null, frame: null, lastClientX: 0, lastClientY: 0 };
+    previewRef.current = null;
     setDragPreview(null);
     window.removeEventListener('pointermove', handleWindowPointerMove);
     window.removeEventListener('pointerup', stopDragging);
@@ -77,7 +88,10 @@ export default function PlannerCanvas({ sport = 'football', cameras = [], select
     dragRef.current.lastClientX = event.clientX;
     dragRef.current.lastClientY = event.clientY;
     const point = eventToPercent(event.clientX, event.clientY);
-    if (point) setDragPreview({ id, ...point });
+    if (point) {
+      previewRef.current = { id, ...point };
+      setDragPreview(previewRef.current);
+    }
     window.addEventListener('pointermove', handleWindowPointerMove, { passive: true });
     window.addEventListener('pointerup', stopDragging);
     window.addEventListener('pointercancel', stopDragging);
@@ -93,7 +107,7 @@ export default function PlannerCanvas({ sport = 'football', cameras = [], select
 
   return (
     <Box>
-      <Stack direction="row" spacing={1} sx={{ mb: 1.5, flexWrap: 'wrap' }}>
+      <Stack direction="row" spacing={1} sx={{ mb: 1.25, flexWrap: 'wrap' }}>
         <Chip label={`Sport: ${preset.name}`} color="primary" variant="outlined" />
         <Chip label={`${cameras.length} Cameras`} variant="outlined" />
         <Chip label={`Scale ${scalePct}%`} variant="outlined" />
@@ -114,19 +128,24 @@ export default function PlannerCanvas({ sport = 'football', cameras = [], select
           sx={{
             position: 'relative',
             width: '100%',
-            borderRadius: 4,
+            borderRadius: 3,
             overflow: 'hidden',
             bgcolor: alpha('#061120', 0.88),
             border: `1px solid ${alpha('#ffffff', 0.12)}`,
-            boxShadow: `0 18px 44px ${alpha('#000000', 0.28)}`,
-            transform: `scale(${stageScale})`,
-            transformOrigin: 'center center'
+            boxShadow: `0 18px 44px ${alpha('#000000', 0.28)}`
           }}
         >
           <Box sx={{ pt: aspectPadding }} />
           <Box
             ref={ref}
-            sx={{ position: 'absolute', inset: 0, userSelect: 'none', touchAction: 'none' }}
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              userSelect: 'none',
+              touchAction: 'none',
+              transform: `scale(${stageScale})`,
+              transformOrigin: 'center center'
+            }}
           >
             <SportField sport={sport} />
 
@@ -150,23 +169,24 @@ export default function PlannerCanvas({ sport = 'football', cameras = [], select
             </svg>
 
             {liveCameras.map((cam, index) => {
-              const picture = pictureInfo(cam.picture);
               const selected = cam.id === selectedId;
               const isDragging = dragPreview?.id === cam.id;
+              const picture = pictureInfo(cam.picture);
+
               return (
                 <Box
                   key={cam.id}
-                  onPointerDown={(e) => onPointerDown(e, cam.id)}
+                  onPointerDown={(event) => onPointerDown(event, cam.id)}
                   onClick={() => setSelectedId(cam.id)}
                   sx={{
                     position: 'absolute',
                     left: `${cam.x}%`,
                     top: `${cam.y}%`,
-                    width: 72,
-                    height: 72,
+                    width: 56,
+                    height: 56,
                     transform: 'translate(-50%, -50%)',
-                    cursor: cam.locked ? 'not-allowed' : (isDragging ? 'grabbing' : 'grab'),
                     borderRadius: '50%',
+                    cursor: cam.locked ? 'default' : isDragging ? 'grabbing' : 'grab',
                     border: `2px solid ${selected ? '#6ee7ff' : 'rgba(255,255,255,0.14)'}`,
                     background: alpha('#0b1220', selected ? 0.86 : 0.6),
                     boxShadow: selected ? `0 0 32px ${alpha('#6ee7ff', 0.42)}` : '0 10px 20px rgba(0,0,0,0.28)',
@@ -212,8 +232,8 @@ export default function PlannerCanvas({ sport = 'football', cameras = [], select
         </Box>
       </Box>
 
-      <Typography variant="caption" sx={{ display: 'block', mt: 1.5, color: 'text.secondary' }}>
-        Drag cameras directly on the field. The scale now stays centered while zooming.
+      <Typography variant="caption" sx={{ display: 'block', mt: 1.25, color: 'text.secondary' }}>
+        Drag cameras directly on the field. Releasing now keeps the camera in the dropped position.
       </Typography>
     </Box>
   );

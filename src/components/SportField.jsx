@@ -3,7 +3,7 @@ import React from 'react';
 function footballMarkup() {
   return (
     <>
-      <rect x="2" y="2" width="996" height="558.5" rx="12" fill="#2d8f4e" stroke="rgba(255,255,255,0.8)" strokeWidth="4" />
+      <rect x="2" y="2" width="996" height="558.5" rx="8" fill="#2d8f4e" stroke="rgba(255,255,255,0.8)" strokeWidth="4" />
       <line x1="500" y1="2" x2="500" y2="560" stroke="white" strokeWidth="4" />
       <circle cx="500" cy="281.25" r="70" fill="none" stroke="white" strokeWidth="4" />
       <circle cx="500" cy="281.25" r="4" fill="white" />
@@ -20,7 +20,7 @@ function footballMarkup() {
 function basketballMarkup() {
   return (
     <>
-      <rect x="2" y="2" width="936" height="496" rx="12" fill="#cf8b4c" stroke="rgba(255,255,255,0.85)" strokeWidth="4" />
+      <rect x="2" y="2" width="936" height="496" rx="8" fill="#cf8b4c" stroke="rgba(255,255,255,0.85)" strokeWidth="4" />
       <line x1="470" y1="2" x2="470" y2="498" stroke="white" strokeWidth="4" />
       <circle cx="470" cy="250" r="60" fill="none" stroke="white" strokeWidth="4" />
       <circle cx="470" cy="250" r="4" fill="white" />
@@ -35,7 +35,7 @@ function basketballMarkup() {
 function handballMarkup() {
   return (
     <>
-      <rect x="2" y="2" width="796" height="396" rx="12" fill="#2d74b3" stroke="rgba(255,255,255,0.85)" strokeWidth="4" />
+      <rect x="2" y="2" width="796" height="396" rx="8" fill="#2d74b3" stroke="rgba(255,255,255,0.85)" strokeWidth="4" />
       <line x1="400" y1="2" x2="400" y2="398" stroke="white" strokeWidth="4" />
       <rect x="2" y="160" width="60" height="80" fill="none" stroke="white" strokeWidth="4" />
       <rect x="738" y="160" width="60" height="80" fill="none" stroke="white" strokeWidth="4" />

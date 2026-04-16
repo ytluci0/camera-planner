@@ -62,7 +62,7 @@ function downloadBlob(blob, filename) {
 
 const panelSx = {
   ...glass('#6ee7ff', 0.12),
-  borderRadius: 4,
+  borderRadius: 3,
   background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)',
   border: '1px solid rgba(255,255,255,0.1)'
 };
@@ -231,7 +231,7 @@ export default function DashboardPage({ pathname = '/editor', onNavigate = () =>
           sx={{
             display: 'grid',
             gridTemplateColumns: { xs: '1fr', xl: 'minmax(0, 1.75fr) minmax(420px, 0.95fr)' },
-            gap: 2.5,
+            gap: 2,
             alignItems: 'start'
           }}
         >

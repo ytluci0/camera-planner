@@ -23,7 +23,7 @@ import { glass } from '../theme';
 export default function CameraEditor({ camera, index, onChange, onDelete }) {
   if (!camera) {
     return (
-      <Card sx={{ ...glass('#6ee7ff', 0.12), borderRadius: 4, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
+      <Card sx={{ ...glass('#6ee7ff', 0.12), borderRadius: 3, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 1 }}>Camera Settings</Typography>
           <Typography color="text.secondary">Select a camera from the field or the list to edit its settings.</Typography>
@@ -36,7 +36,7 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
 
   return (
     <Stack spacing={2}>
-      <Card sx={{ ...glass('#6ee7ff', 0.12), borderRadius: 4, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
+      <Card sx={{ ...glass('#6ee7ff', 0.12), borderRadius: 3, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 2 }}>
             <Box>
@@ -90,7 +90,7 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
                   sx={{
                     width: 78,
                     height: 78,
-                    borderRadius: 3,
+                    borderRadius: 2,
                     objectFit: 'contain',
                     p: 1,
                     background: 'rgba(255,255,255,0.04)',
@@ -105,7 +105,7 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
         </CardContent>
       </Card>
 
-      <Card sx={{ ...glass('#6ee7ff', 0.1), borderRadius: 4, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
+      <Card sx={{ ...glass('#6ee7ff', 0.1), borderRadius: 3, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>Placement & Framing</Typography>
           <Grid container spacing={2}>
@@ -163,7 +163,7 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
         </CardContent>
       </Card>
 
-      <Card sx={{ ...glass('#6ee7ff', 0.12), borderRadius: 4, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
+      <Card sx={{ ...glass('#6ee7ff', 0.12), borderRadius: 3, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 1.5 }}>Notes</Typography>
           <TextField
