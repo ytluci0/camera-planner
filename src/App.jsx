@@ -11,6 +11,7 @@ import {
 import { alpha } from '@mui/material/styles';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import ProjectsPage from './pages/ProjectsPage';
 import { useAuth } from './context/AuthContext';
 
 const NAV_ITEMS = [
@@ -19,9 +20,9 @@ const NAV_ITEMS = [
   { key: 'projects', path: '/projects', label: 'Projects' }
 ];
 
-function navigateTo(path) {
-  if (window.location.pathname === path) return;
-  window.history.pushState({}, '', path);
+function navigateTo(url) {
+  if (window.location.pathname + window.location.search === url) return;
+  window.history.pushState({}, '', url);
   window.dispatchEvent(new PopStateEvent('popstate'));
 }
 
@@ -44,7 +45,7 @@ function PlaceholderPage({ title, description, onNavigate }) {
       </Box>
 
       <Box sx={{ maxWidth: 980, mx: 'auto', p: { xs: 2, md: 4 } }}>
-        <Card sx={{ borderRadius: 4, background: 'linear-gradient(180deg, rgba(18,40,66,0.92) 0%, rgba(8,18,34,0.96) 100%)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <Card sx={{ borderRadius: '16px', background: 'linear-gradient(180deg, rgba(18,40,66,0.92) 0%, rgba(8,18,34,0.96) 100%)', border: '1px solid rgba(255,255,255,0.1)' }}>
           <CardContent sx={{ p: 4 }}>
             <Typography variant="h4" sx={{ mb: 1.5 }}>{title}</Typography>
             <Typography color="text.secondary" sx={{ mb: 3 }}>{description}</Typography>
@@ -58,17 +59,18 @@ function PlaceholderPage({ title, description, onNavigate }) {
 
 export default function App() {
   const { user, loading } = useAuth();
-  const [pathname, setPathname] = useState(window.location.pathname);
+  const [route, setRoute] = useState({ pathname: window.location.pathname, search: window.location.search });
 
   useEffect(() => {
     const syncPath = () => {
-      const next = window.location.pathname || '/';
-      if (next === '/') {
+      const nextPathname = window.location.pathname || '/';
+      const nextSearch = window.location.search || '';
+      if (nextPathname === '/') {
         navigateTo('/editor');
-        setPathname('/editor');
+        setRoute({ pathname: '/editor', search: '' });
         return;
       }
-      setPathname(next);
+      setRoute({ pathname: nextPathname, search: nextSearch });
     };
 
     syncPath();
@@ -77,10 +79,10 @@ export default function App() {
   }, []);
 
   const page = useMemo(() => {
-    if (pathname.startsWith('/admin')) return 'admin';
-    if (pathname.startsWith('/projects')) return 'projects';
+    if (route.pathname.startsWith('/admin')) return 'admin';
+    if (route.pathname.startsWith('/projects')) return 'projects';
     return 'editor';
-  }, [pathname]);
+  }, [route.pathname]);
 
   if (loading) {
     return (
@@ -97,8 +99,8 @@ export default function App() {
   }
 
   if (page === 'projects') {
-    return <PlaceholderPage title="Projects" description="Saved projects placeholder." onNavigate={navigateTo} />;
+    return <ProjectsPage onNavigate={navigateTo} />;
   }
 
-  return <DashboardPage pathname={pathname} onNavigate={navigateTo} />;
+  return <DashboardPage pathname={route.pathname} search={route.search} onNavigate={navigateTo} />;
 }

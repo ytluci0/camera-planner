@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Box,
@@ -62,12 +62,12 @@ function downloadBlob(blob, filename) {
 
 const panelSx = {
   ...glass('#6ee7ff', 0.12),
-  borderRadius: 3,
+  borderRadius: '16px',
   background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)',
   border: '1px solid rgba(255,255,255,0.1)'
 };
 
-export default function DashboardPage({ pathname = '/editor', onNavigate = () => {} }) {
+export default function DashboardPage({ pathname = '/editor', search = '', onNavigate = () => {} }) {
   const { user, logout, has } = useAuth();
   const stageRef = useRef(null);
   const [project, setProject] = useState(starter);
@@ -79,6 +79,39 @@ export default function DashboardPage({ pathname = '/editor', onNavigate = () =>
   const titleLine = useMemo(() => `${project.name || 'Untitled Project'} • ${SPORT_PRESETS[project.sport_type]?.name || 'Football'}`, [project.name, project.sport_type]);
   const selectedCamera = useMemo(() => project.cameras.find((cam) => cam.id === selectedId) || null, [project.cameras, selectedId]);
   const selectedIndex = useMemo(() => project.cameras.findIndex((cam) => cam.id === selectedId), [project.cameras, selectedId]);
+
+  useEffect(() => {
+    const projectId = new URLSearchParams(search).get('projectId');
+    if (!projectId) return;
+
+    const loadProjectById = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await api.get(`/api/projects/${projectId}`);
+        const loaded = data.project;
+        const nextCameras = loaded.payload_json?.cameras?.length ? loaded.payload_json.cameras : [createCamera(0)];
+        setProject({
+          id: loaded.id,
+          name: loaded.name,
+          event_date: loaded.event_date || '',
+          event_time: loaded.event_time || '',
+          sport_type: loaded.payload_json?.sport_type || loaded.sport_type || 'football',
+          pitch_scale: loaded.payload_json?.pitch_scale || 1,
+          cameras: nextCameras,
+          notes: loaded.payload_json?.notes || ''
+        });
+        setSelectedId(nextCameras[0]?.id || null);
+        setStatus(`Loaded project: ${loaded.name}`);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProjectById();
+  }, [search]);
 
   const setCameras = (updater) => {
     setProject((prev) => {
@@ -131,8 +164,13 @@ export default function DashboardPage({ pathname = '/editor', onNavigate = () =>
       const data = project.id
         ? await api.put(`/api/projects/${project.id}`, body)
         : await api.post('/api/projects', body);
-      setProject((prev) => ({ ...prev, id: data.project.id }));
-      setStatus(`Saved project #${data.project.id}`);
+
+      const savedId = data.project.id;
+      setProject((prev) => ({ ...prev, id: savedId }));
+      setStatus(`Saved project #${savedId}`);
+      if (!project.id) {
+        onNavigate(`/editor?projectId=${savedId}`);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -163,6 +201,7 @@ export default function DashboardPage({ pathname = '/editor', onNavigate = () =>
       });
       setSelectedId(nextCameras[0]?.id || null);
       setStatus(`Loaded latest project: ${latest.name}`);
+      onNavigate(`/editor?projectId=${latest.id}`);
     } catch (err) {
       setError(err.message);
     } finally {
