@@ -209,6 +209,18 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
     setStatus('Camera removed.');
   };
 
+  const handleNewProject = () => {
+    const nextStarter = {
+      ...starter,
+      cameras: [createCamera(0)]
+    };
+    setProject(nextStarter);
+    setSelectedId(nextStarter.cameras[0].id);
+    setError('');
+    setStatus('New project ready.');
+    onNavigate('/editor');
+  };
+
   const saveProject = async () => {
     setLoading(true);
     setError('');
@@ -322,6 +334,7 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
                 {item.label}
               </Button>
             ))}
+            <Button variant="outlined" onClick={handleNewProject} disabled={loading}>New project</Button>
             <Button startIcon={<RestoreRoundedIcon />} variant="outlined" onClick={loadLatest} disabled={loading}>Load latest</Button>
             <Button startIcon={<SaveRoundedIcon />} variant="contained" onClick={saveProject} disabled={loading || !has('projects:edit')}>Save project</Button>
             <Button variant="outlined" color="inherit" sx={{ px: 1.6 }}>{`${user?.name || 'User'} • ${user?.role_name || 'viewer'}`}</Button>
