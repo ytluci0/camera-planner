@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "camera-planner-react-cloudflare",
+  "compatibility_date": "2026-04-16",
+  "pages_build_output_dir": "dist",
+  "d1_databases": [
+    {
+      "binding": "CAMERA_DB",
+      "database_name": "camera-planner-db",
+      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "CAMERA_ASSETS",
+      "bucket_name": "camera-planner-assets"
+    }
+  ],
+  "vars": {
+    "APP_NAME": "Camera Planner",
+    "SESSION_COOKIE_NAME": "camplanner_session",
+    "PUBLIC_R2_BASE_URL": "https://pub-REPLACE_ME.r2.dev"
+  }
+}
