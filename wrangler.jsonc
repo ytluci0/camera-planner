@@ -7,7 +7,7 @@
     {
       "binding": "CAMERA_DB",
       "database_name": "camera-planner-db",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+      "database_id": "75557123-8b1f-4b83-8bfb-1d1a22b41bdd"
     }
   ],
   "r2_buckets": [
