@@ -67,9 +67,69 @@ const panelSx = {
   border: '1px solid rgba(255,255,255,0.1)'
 };
 
+function formatEventDate(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString();
+}
+
+function ExportOverviewTable({ cameras = [] }) {
+  return (
+    <Box
+      component="table"
+      sx={{
+        width: '100%',
+        borderCollapse: 'separate',
+        borderSpacing: 0,
+        overflow: 'hidden',
+        border: `1px solid ${alpha('#ffffff', 0.12)}`,
+        borderRadius: '14px'
+      }}
+    >
+      <Box component="thead" sx={{ backgroundColor: alpha('#ffffff', 0.03) }}>
+        <Box component="tr">
+          {['#', 'Purpose', 'Camera Type', 'Lens', 'Picture', 'Notes', 'Angle', 'FOV'].map((label) => (
+            <Box
+              key={label}
+              component="th"
+              sx={{
+                textAlign: 'left',
+                px: 1.5,
+                py: 1.2,
+                fontSize: 13,
+                fontWeight: 800,
+                color: 'rgba(255,255,255,0.86)',
+                borderBottom: `1px solid ${alpha('#ffffff', 0.1)}`
+              }}
+            >
+              {label}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+      <Box component="tbody">
+        {cameras.map((cam, index) => (
+          <Box key={cam.id || index} component="tr" sx={{ '&:nth-of-type(odd)': { backgroundColor: alpha('#ffffff', 0.02) } }}>
+            <Box component="td" sx={{ px: 1.5, py: 1.1, fontSize: 13 }}>{index + 1}</Box>
+            <Box component="td" sx={{ px: 1.5, py: 1.1, fontSize: 13 }}>{cam.purpose || '—'}</Box>
+            <Box component="td" sx={{ px: 1.5, py: 1.1, fontSize: 13 }}>{cam.cameraType || '—'}</Box>
+            <Box component="td" sx={{ px: 1.5, py: 1.1, fontSize: 13 }}>{cam.lens || '—'}</Box>
+            <Box component="td" sx={{ px: 1.5, py: 1.1, fontSize: 13 }}>{cam.picture || '—'}</Box>
+            <Box component="td" sx={{ px: 1.5, py: 1.1, fontSize: 13, maxWidth: 260, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cam.notes || '—'}</Box>
+            <Box component="td" sx={{ px: 1.5, py: 1.1, fontSize: 13 }}>{`${Number(cam.angle) || 0}°`}</Box>
+            <Box component="td" sx={{ px: 1.5, py: 1.1, fontSize: 13 }}>{`${Number(cam.fov) || 0}°`}</Box>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
 export default function DashboardPage({ pathname = '/editor', search = '', onNavigate = () => {} }) {
   const { user, logout, has } = useAuth();
   const stageRef = useRef(null);
+  const exportRef = useRef(null);
   const [project, setProject] = useState(starter);
   const [selectedId, setSelectedId] = useState(starter.cameras[0].id);
   const [status, setStatus] = useState('Starter loaded.');
@@ -79,6 +139,7 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
   const titleLine = useMemo(() => `${project.name || 'Untitled Project'} • ${SPORT_PRESETS[project.sport_type]?.name || 'Football'}`, [project.name, project.sport_type]);
   const selectedCamera = useMemo(() => project.cameras.find((cam) => cam.id === selectedId) || null, [project.cameras, selectedId]);
   const selectedIndex = useMemo(() => project.cameras.findIndex((cam) => cam.id === selectedId), [project.cameras, selectedId]);
+  const pitchLabel = SPORT_PRESETS[project.sport_type]?.name || 'Football';
 
   useEffect(() => {
     const projectId = new URLSearchParams(search).get('projectId');
@@ -221,9 +282,13 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
   };
 
   const exportPdf = async () => {
-    const node = stageRef.current;
+    const node = exportRef.current;
     if (!node) return;
-    const canvas = await html2canvas(node, { backgroundColor: '#07111f', scale: 2 });
+    const canvas = await html2canvas(node, {
+      backgroundColor: '#07111f',
+      scale: 2,
+      useCORS: true
+    });
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
@@ -354,6 +419,62 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
 
         <Box sx={{ mt: 2.5 }}>
           {error ? <Alert severity="error">{error}</Alert> : <Alert severity="info">{status}</Alert>}
+        </Box>
+      </Box>
+
+      <Box sx={{ position: 'fixed', left: -10000, top: 0, width: 1600, pointerEvents: 'none' }}>
+        <Box
+          ref={exportRef}
+          sx={{
+            width: 1600,
+            p: 4,
+            color: '#ffffff',
+            bgcolor: '#07111f'
+          }}
+        >
+          <Typography sx={{ fontSize: 34, fontWeight: 800, lineHeight: 1 }}>Camera Planner</Typography>
+          <Typography sx={{ mt: 0.5, color: 'rgba(255,255,255,0.68)', fontSize: 16 }}>{project.name || 'Untitled Project'}</Typography>
+
+          <Box
+            sx={{
+              mt: 2.5,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+              gap: 1.5
+            }}
+          >
+            {[
+              ['Pitch Type', pitchLabel],
+              ['Number of Cameras', String(project.cameras.length)],
+              ['Project Name', project.name || '—'],
+              ['Event Date', formatEventDate(project.event_date)],
+              ['Event Time', project.event_time || '—']
+            ].map(([label, value]) => (
+              <Box key={label} sx={{ border: `1px solid ${alpha('#ffffff', 0.1)}`, borderRadius: '14px', p: 1.5, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
+                <Typography sx={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#6ee7ff' }}>{label}</Typography>
+                <Typography sx={{ mt: 0.65, fontSize: 20, fontWeight: 700 }}>{value}</Typography>
+              </Box>
+            ))}
+          </Box>
+
+          <Box sx={{ mt: 2.5, border: `1px solid ${alpha('#ffffff', 0.1)}`, borderRadius: '16px', p: 2, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
+            <PlannerCanvas
+              sport={project.sport_type}
+              cameras={project.cameras}
+              selectedId={selectedId}
+              setSelectedId={() => {}}
+              setCameras={() => {}}
+              scale={project.pitch_scale}
+              readOnly
+              showScaleChip={false}
+              helperText={false}
+            />
+          </Box>
+
+          <Box sx={{ mt: 2.5 }}>
+            <Typography sx={{ fontSize: 26, fontWeight: 800, mb: 1.5 }}>Cameras Overview</Typography>
+            <ExportOverviewTable cameras={project.cameras} />
+          </Box>
         </Box>
       </Box>
     </Box>

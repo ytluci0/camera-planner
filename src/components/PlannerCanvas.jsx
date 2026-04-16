@@ -18,7 +18,9 @@ export default function PlannerCanvas({
   setSelectedId = () => {},
   setCameras = () => {},
   scale = 1,
-  readOnly = false
+  readOnly = false,
+  showScaleChip = true,
+  helperText = true
 }) {
   const ref = useRef(null);
   const previewRef = useRef(null);
@@ -118,7 +120,7 @@ export default function PlannerCanvas({
       <Stack direction="row" spacing={1} sx={{ mb: 1.25, flexWrap: 'wrap' }}>
         <Chip label={`Sport: ${preset.name}`} color="primary" variant="outlined" />
         <Chip label={`${cameras.length} Cameras`} variant="outlined" />
-        <Chip label={`Scale ${scalePct}%`} variant="outlined" />
+        {showScaleChip ? <Chip label={`Scale ${scalePct}%`} variant="outlined" /> : null}
       </Stack>
 
       <Box
@@ -241,9 +243,11 @@ export default function PlannerCanvas({
         </Box>
       </Box>
 
-      <Typography variant="caption" sx={{ display: 'block', mt: 1.25, color: 'text.secondary' }}>
-        {readOnly ? 'Viewer mode: field and camera overview only.' : 'Drag cameras directly on the field. Releasing now keeps the camera in the dropped position.'}
-      </Typography>
+      {helperText ? (
+        <Typography variant="caption" sx={{ display: 'block', mt: 1.25, color: 'text.secondary' }}>
+          {readOnly ? 'Viewer mode: field and camera overview only.' : 'Drag cameras directly on the field. Releasing now keeps the camera in the dropped position.'}
+        </Typography>
+      ) : null}
     </Box>
   );
 }
