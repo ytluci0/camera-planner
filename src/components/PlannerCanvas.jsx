@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Box, Chip, Stack, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import SportField from './SportField';
@@ -19,40 +19,19 @@ function getConeAngle(cam) {
 
 export default function PlannerCanvas({ sport, cameras, selectedId, setSelectedId, setCameras, scale = 1 }) {
   const [dragId, setDragId] = useState(null);
-  const ref = useRef(null);
-  const dragRef = useRef({ id: null, pending: null, frame: null });
+  const frameRef = useRef(null);
+  const rafRef = useRef(null);
   const preset = SPORT_PRESETS[sport] || SPORT_PRESETS.football;
 
   const aspectPadding = useMemo(() => `${(preset.height / preset.width) * 100}%`, [preset.height, preset.width]);
 
-  const commitMove = () => {
-    const { id, pending } = dragRef.current;
-    if (!id || !pending) return;
-    setCameras((prev) => prev.map((cam) => (cam.id === id && !cam.locked ? { ...cam, ...pending } : cam)));
-    dragRef.current.frame = null;
-  };
-
   const moveCamera = (id, clientX, clientY) => {
-    const container = ref.current;
+    const container = frameRef.current;
     if (!container) return;
     const rect = container.getBoundingClientRect();
     const x = clamp(((clientX - rect.left) / rect.width) * 100, 0, 100);
     const y = clamp(((clientY - rect.top) / rect.height) * 100, 0, 100);
-    dragRef.current.id = id;
-    dragRef.current.pending = { x, y };
-    if (!dragRef.current.frame) {
-      dragRef.current.frame = window.requestAnimationFrame(commitMove);
-    }
-  };
-
-  const stopDragging = () => {
-    setDragId(null);
-    dragRef.current.id = null;
-    dragRef.current.pending = null;
-    if (dragRef.current.frame) {
-      window.cancelAnimationFrame(dragRef.current.frame);
-      dragRef.current.frame = null;
-    }
+    setCameras((prev) => prev.map((cam) => (cam.id === id && !cam.locked ? { ...cam, x, y } : cam)));
   };
 
   const onPointerDown = (event, id) => {
@@ -65,12 +44,19 @@ export default function PlannerCanvas({ sport, cameras, selectedId, setSelectedI
 
   const onPointerMove = (event) => {
     if (!dragId) return;
-    moveCamera(dragId, event.clientX, event.clientY);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      moveCamera(dragId, event.clientX, event.clientY);
+    });
   };
 
-  useEffect(() => () => {
-    if (dragRef.current.frame) window.cancelAnimationFrame(dragRef.current.frame);
-  }, []);
+  const onPointerUp = () => {
+    setDragId(null);
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  };
 
   return (
     <Box>
@@ -84,23 +70,22 @@ export default function PlannerCanvas({ sport, cameras, selectedId, setSelectedI
         sx={{
           position: 'relative',
           width: '100%',
-          maxWidth: '1280px',
-          mx: 'auto',
+          maxWidth: '100%',
           borderRadius: 5,
           overflow: 'hidden',
-          bgcolor: alpha('#03101f', 0.78),
+          bgcolor: alpha('#0b1828', 0.9),
           border: `1px solid ${alpha('#ffffff', 0.12)}`,
           transform: `scale(${scale})`,
-          transformOrigin: 'top center'
+          transformOrigin: 'top left'
         }}
       >
         <Box sx={{ pt: aspectPadding }} />
         <Box
-          ref={ref}
+          ref={frameRef}
           onPointerMove={onPointerMove}
-          onPointerUp={stopDragging}
-          onPointerLeave={stopDragging}
-          sx={{ position: 'absolute', inset: 0, userSelect: 'none', touchAction: 'none' }}
+          onPointerUp={onPointerUp}
+          onPointerLeave={onPointerUp}
+          sx={{ position: 'absolute', inset: 0, userSelect: 'none' }}
         >
           <SportField sport={sport} />
 
@@ -110,7 +95,7 @@ export default function PlannerCanvas({ sport, cameras, selectedId, setSelectedI
               const y = (cam.y / 100) * preset.height;
               const angle = getConeAngle(cam);
               const fov = clamp(Number(cam.fov) || 50, 10, 120);
-              const radius = preset.width * 0.19;
+              const radius = preset.width * 0.18;
               const a = ((angle - fov / 2) * Math.PI) / 180;
               const b = ((angle + fov / 2) * Math.PI) / 180;
               const x1 = x + radius * Math.cos(a);
@@ -118,15 +103,22 @@ export default function PlannerCanvas({ sport, cameras, selectedId, setSelectedI
               const x2 = x + radius * Math.cos(b);
               const y2 = y + radius * Math.sin(b);
               const mid = (angle * Math.PI) / 180;
-              const d = `M ${x} ${y} L ${x1} ${y1} Q ${x + radius * 0.92 * Math.cos(mid)} ${y + radius * 0.92 * Math.sin(mid)} ${x2} ${y2} Z`;
-              return <path key={`${cam.id}-cone`} d={d} fill="rgba(220,220,220,0.18)" stroke="rgba(255,255,255,0.20)" strokeWidth="1.5" />;
+              const d = `M ${x} ${y} L ${x1} ${y1} Q ${x + radius * 0.9 * Math.cos(mid)} ${y + radius * 0.9 * Math.sin(mid)} ${x2} ${y2} Z`;
+              return (
+                <path
+                  key={`${cam.id}-cone`}
+                  d={d}
+                  fill="rgba(220,220,220,0.22)"
+                  stroke="rgba(255,255,255,0.22)"
+                  strokeWidth="1.5"
+                />
+              );
             })}
           </svg>
 
           {cameras.map((cam, index) => {
             const picture = pictureInfo(cam.picture);
             const selected = cam.id === selectedId;
-            const isDragging = cam.id === dragId;
             return (
               <Box
                 key={cam.id}
@@ -136,17 +128,15 @@ export default function PlannerCanvas({ sport, cameras, selectedId, setSelectedI
                   position: 'absolute',
                   left: `${cam.x}%`,
                   top: `${cam.y}%`,
-                  width: 72,
-                  height: 72,
+                  width: 60,
+                  height: 60,
                   transform: 'translate(-50%, -50%)',
-                  cursor: cam.locked ? 'not-allowed' : (isDragging ? 'grabbing' : 'grab'),
+                  cursor: cam.locked ? 'not-allowed' : 'grab',
                   borderRadius: '50%',
-                  border: `2px solid ${selected ? '#6ee7ff' : 'rgba(255,255,255,0.15)'}`,
-                  background: alpha('#0b1220', selected ? 0.85 : 0.58),
-                  boxShadow: selected ? `0 0 36px ${alpha('#6ee7ff', 0.45)}` : '0 8px 20px rgba(0,0,0,0.25)',
-                  transition: isDragging ? 'none' : 'left 120ms linear, top 120ms linear, box-shadow 160ms ease, transform 160ms ease',
-                  willChange: 'left, top, transform',
-                  zIndex: selected ? 3 : 2
+                  border: `2px solid ${selected ? '#7dd3fc' : 'rgba(255,255,255,0.15)'}`,
+                  background: alpha('#09121f', 0.62),
+                  boxShadow: selected ? `0 0 26px ${alpha('#7dd3fc', 0.42)}` : `0 8px 24px ${alpha('#000000', 0.35)}`,
+                  transition: 'left 60ms linear, top 60ms linear, box-shadow 120ms ease'
                 }}
               >
                 <Box
@@ -164,10 +154,10 @@ export default function PlannerCanvas({ sport, cameras, selectedId, setSelectedI
                 <Box
                   sx={{
                     position: 'absolute',
-                    top: -5,
-                    right: -5,
-                    width: 24,
-                    height: 24,
+                    top: -4,
+                    right: -4,
+                    width: 22,
+                    height: 22,
                     borderRadius: '50%',
                     bgcolor: selected ? 'primary.main' : 'error.main',
                     display: 'grid',
@@ -186,7 +176,7 @@ export default function PlannerCanvas({ sport, cameras, selectedId, setSelectedI
       </Box>
 
       <Typography variant="caption" sx={{ display: 'block', mt: 1.5, color: 'text.secondary' }}>
-        Click a camera to open its settings. Dragging is smoother now, while angle, FOV, mirror, and lock live in the camera settings panel.
+        Click a camera on the field or in the overview table to edit it from the right-side control panel.
       </Typography>
     </Box>
   );

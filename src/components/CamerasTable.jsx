@@ -2,73 +2,95 @@ import React from 'react';
 import {
   Box,
   Chip,
-  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Tooltip
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { pictureInfo } from '../utils/plannerConfig';
 
-export default function CamerasTable({ cameras = [], selectedId, setSelectedId }) {
+export default function CamerasTable({ cameras, selectedId, setSelectedId }) {
   return (
-    <TableContainer sx={{ borderRadius: 4, border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-      <Table size="small" sx={{ minWidth: 980 }}>
+    <TableContainer
+      sx={{
+        borderRadius: 4,
+        border: `1px solid ${alpha('#b8d4ff', 0.12)}`,
+        overflow: 'hidden'
+      }}
+    >
+      <Table size="small">
         <TableHead>
           <TableRow>
             {['#', 'Purpose', 'Camera Type', 'Lens', 'Picture', 'Notes', 'Angle', 'FOV', 'Mirror', 'Lock'].map((label) => (
-              <TableCell key={label} sx={{ whiteSpace: 'nowrap', fontWeight: 700 }}>{label}</TableCell>
+              <TableCell key={label} sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                {label}
+              </TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
           {cameras.map((cam, index) => {
             const picture = pictureInfo(cam.picture);
-            const selected = cam.id === selectedId;
             return (
               <TableRow
                 key={cam.id}
                 hover
-                selected={selected}
+                selected={cam.id === selectedId}
                 onClick={() => setSelectedId(cam.id)}
                 sx={{
                   cursor: 'pointer',
-                  '& td': {
-                    py: 1.4,
-                    borderBottom: '1px solid rgba(255,255,255,0.06)'
-                  },
                   '&.Mui-selected': {
-                    backgroundColor: 'rgba(110,231,255,0.10)'
+                    backgroundColor: alpha('#7dd3fc', 0.12)
+                  },
+                  '&.Mui-selected:hover': {
+                    backgroundColor: alpha('#7dd3fc', 0.16)
                   }
                 }}
               >
-                <TableCell sx={{ fontWeight: 700 }}>{index + 1}</TableCell>
+                <TableCell>{index + 1}</TableCell>
                 <TableCell>{cam.purpose}</TableCell>
                 <TableCell>{cam.cameraType}</TableCell>
                 <TableCell>{cam.lens}</TableCell>
                 <TableCell>{picture.name}</TableCell>
-                <TableCell sx={{ maxWidth: 280 }}>
-                  <Typography variant="body2" color="text.secondary" noWrap>
-                    {cam.loc || '—'}
-                  </Typography>
+                <TableCell sx={{ maxWidth: 260 }}>
+                  <Tooltip title={cam.loc || '—'}>
+                    <Box
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        color: cam.loc ? 'text.primary' : 'text.secondary'
+                      }}
+                    >
+                      {cam.loc || '—'}
+                    </Box>
+                  </Tooltip>
                 </TableCell>
-                <TableCell>{Number(cam.angle) || 0}°</TableCell>
-                <TableCell>{Number(cam.fov) || 0}°</TableCell>
+                <TableCell>{Math.round(Number(cam.angle) || 0)}°</TableCell>
+                <TableCell>{Math.round(Number(cam.fov) || 50)}°</TableCell>
                 <TableCell>
-                  <Chip size="small" label={cam.mirror ? 'On' : 'Off'} color={cam.mirror ? 'primary' : 'default'} variant={cam.mirror ? 'filled' : 'outlined'} />
+                  <Chip size="small" label={cam.mirror ? 'On' : 'Off'} variant="outlined" />
                 </TableCell>
                 <TableCell>
-                  <Chip size="small" label={cam.locked ? 'Locked' : 'Free'} color={cam.locked ? 'warning' : 'success'} variant="outlined" />
+                  <Chip
+                    size="small"
+                    label={cam.locked ? 'Locked' : 'Free'}
+                    color={cam.locked ? 'warning' : 'success'}
+                    variant="outlined"
+                  />
                 </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-      {!cameras.length && <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>No cameras yet.</Box>}
+      {!cameras.length && (
+        <Box sx={{ p: 3, textAlign: 'center', color: 'text.secondary' }}>No cameras yet.</Box>
+      )}
     </TableContainer>
   );
 }
