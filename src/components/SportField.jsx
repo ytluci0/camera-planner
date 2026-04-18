@@ -245,8 +245,8 @@ export default function SportField({ sport, activeLevels = [] }) {
     sport === "basketball"
       ? "-120 -90 1180 680"
       : sport === "handball"
-        ? "-120 -90 1040 580"
-        : "-140 -100 1280 760";
+        ? "-200 -160 1300 900"
+        : "-300 -250 1800 1200";
 
   return (
     <svg
