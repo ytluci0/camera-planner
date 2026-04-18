@@ -4,8 +4,8 @@ function levelRects(width, height, activeLevels = []) {
   const levels = [
     {
       id: 1,
-      padX: 0,
-      padY: 0,
+      padX: 26,
+      padY: 18,
       fill: "rgba(120, 120, 120, 0.18)",
       stroke: "rgba(30, 30, 30, 0.55)"
     },
