@@ -1,8 +1,48 @@
 import React from 'react';
 
-function footballMarkup() {
+function levelRects(width, height, activeLevels = []) {
+  const levels = [
+    { id: 1, padX: 0, padY: 0, labelOffsetX: 0, labelOffsetY: -18 },
+    { id: 2, padX: 60, padY: 42, labelOffsetX: 8, labelOffsetY: -14 },
+    { id: 3, padX: 118, padY: 78, labelOffsetX: 16, labelOffsetY: -12 }
+  ].filter((item) => activeLevels.includes(item.id));
+
+  return levels.map((level) => {
+    const x = 2 - level.padX;
+    const y = 2 - level.padY;
+    const rectWidth = width - 4 + level.padX * 2;
+    const rectHeight = height - 4 + level.padY * 2;
+
+    return (
+      <g key={`level-${level.id}`}>
+        <rect
+          x={x}
+          y={y}
+          width={rectWidth}
+          height={rectHeight}
+          rx="8"
+          fill="none"
+          stroke="rgba(0,0,0,0.55)"
+          strokeWidth="1.5"
+        />
+        <text
+          x={x + 4 + level.labelOffsetX}
+          y={y + level.labelOffsetY}
+          fontSize="16"
+          fill="rgba(0,0,0,0.75)"
+          style={{ userSelect: 'none' }}
+        >
+          {`Level ${level.id}`}
+        </text>
+      </g>
+    );
+  });
+}
+
+function footballMarkup(activeLevels) {
   return (
     <>
+      {levelRects(1000, 562.5, activeLevels)}
       <rect x="2" y="2" width="996" height="558.5" rx="8" fill="#2d8f4e" stroke="rgba(255,255,255,0.8)" strokeWidth="4" />
       <line x1="500" y1="2" x2="500" y2="560" stroke="white" strokeWidth="4" />
       <circle cx="500" cy="281.25" r="70" fill="none" stroke="white" strokeWidth="4" />
@@ -17,9 +57,10 @@ function footballMarkup() {
   );
 }
 
-function basketballMarkup() {
+function basketballMarkup(activeLevels) {
   return (
     <>
+      {levelRects(940, 500, activeLevels)}
       <rect x="2" y="2" width="936" height="496" rx="8" fill="#cf8b4c" stroke="rgba(255,255,255,0.85)" strokeWidth="4" />
       <line x1="470" y1="2" x2="470" y2="498" stroke="white" strokeWidth="4" />
       <circle cx="470" cy="250" r="60" fill="none" stroke="white" strokeWidth="4" />
@@ -32,9 +73,10 @@ function basketballMarkup() {
   );
 }
 
-function handballMarkup() {
+function handballMarkup(activeLevels) {
   return (
     <>
+      {levelRects(800, 400, activeLevels)}
       <rect x="2" y="2" width="796" height="396" rx="8" fill="#2d74b3" stroke="rgba(255,255,255,0.85)" strokeWidth="4" />
       <line x1="400" y1="2" x2="400" y2="398" stroke="white" strokeWidth="4" />
       <rect x="2" y="160" width="60" height="80" fill="none" stroke="white" strokeWidth="4" />
@@ -47,9 +89,9 @@ function handballMarkup() {
   );
 }
 
-export default function SportField({ sport }) {
-  const markup = sport === 'basketball' ? basketballMarkup() : sport === 'handball' ? handballMarkup() : footballMarkup();
-  const viewBox = sport === 'basketball' ? '0 0 940 500' : sport === 'handball' ? '0 0 800 400' : '0 0 1000 562.5';
+export default function SportField({ sport, activeLevels = [] }) {
+  const markup = sport === 'basketball' ? basketballMarkup(activeLevels) : sport === 'handball' ? handballMarkup(activeLevels) : footballMarkup(activeLevels);
+  const viewBox = sport === 'basketball' ? '-120 -90 1180 680' : sport === 'handball' ? '-120 -90 1040 580' : '-140 -100 1280 760';
 
   return (
     <svg viewBox={viewBox} width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ position: 'absolute', inset: 0 }}>

@@ -20,7 +20,8 @@ export default function PlannerCanvas({
   scale = 1,
   readOnly = false,
   showScaleChip = true,
-  helperText = true
+  helperText = true,
+  activeLevels = []
 }) {
   const ref = useRef(null);
   const previewRef = useRef(null);
@@ -157,7 +158,7 @@ export default function PlannerCanvas({
               transformOrigin: 'center center'
             }}
           >
-            <SportField sport={sport} />
+            <SportField sport={sport} activeLevels={activeLevels} />
 
             <svg width="100%" height="100%" viewBox={`0 0 ${preset.width} ${preset.height}`} style={{ position: 'absolute', inset: 0 }}>
               {liveCameras.map((cam) => {

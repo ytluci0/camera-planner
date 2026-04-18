@@ -48,7 +48,8 @@ const starter = {
   sport_type: 'football',
   pitch_scale: 1,
   cameras: [createCamera(0)],
-  notes: ''
+  notes: '',
+  active_levels: []
 };
 
 function downloadBlob(blob, filename) {
@@ -160,7 +161,8 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
           sport_type: loaded.payload_json?.sport_type || loaded.sport_type || 'football',
           pitch_scale: loaded.payload_json?.pitch_scale || 1,
           cameras: nextCameras,
-          notes: loaded.payload_json?.notes || ''
+          notes: loaded.payload_json?.notes || '',
+          active_levels: loaded.payload_json?.active_levels || []
         });
         setSelectedId(nextCameras[0]?.id || null);
         setStatus(`Loaded project: ${loaded.name}`);
@@ -231,7 +233,8 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
           sport_type: project.sport_type,
           pitch_scale: project.pitch_scale,
           cameras: project.cameras,
-          notes: project.notes
+          notes: project.notes,
+          active_levels: project.active_levels
         }
       };
       const data = project.id
@@ -270,7 +273,8 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
         sport_type: latest.payload_json?.sport_type || latest.sport_type || 'football',
         pitch_scale: latest.payload_json?.pitch_scale || 1,
         cameras: nextCameras,
-        notes: latest.payload_json?.notes || ''
+        notes: latest.payload_json?.notes || '',
+        active_levels: latest.payload_json?.active_levels || []
       });
       setSelectedId(nextCameras[0]?.id || null);
       setStatus(`Loaded latest project: ${latest.name}`);
@@ -362,6 +366,7 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
                   setSelectedId={setSelectedId}
                   setCameras={setCameras}
                   scale={project.pitch_scale}
+                  activeLevels={project.active_levels}
                 />
               </CardContent>
             </Card>
@@ -394,6 +399,29 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
                   <Grid item xs={12} md={5}>
                     <Typography variant="body2" sx={{ mb: 0.75 }}>Pitch Scale</Typography>
                     <Slider min={0.75} max={1.35} step={0.01} value={project.pitch_scale} onChange={(_, value) => setProject((prev) => ({ ...prev, pitch_scale: value }))} valueLabelDisplay="auto" valueLabelFormat={(value) => `${Math.round(value * 100)}%`} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body2" sx={{ mb: 1 }}>Levels Area</Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap">
+                      {[1, 2, 3].map((level) => {
+                        const active = project.active_levels.includes(level);
+                        return (
+                          <Button
+                            key={level}
+                            variant={active ? 'contained' : 'outlined'}
+                            size="small"
+                            onClick={() => setProject((prev) => ({
+                              ...prev,
+                              active_levels: prev.active_levels.includes(level)
+                                ? prev.active_levels.filter((item) => item !== level)
+                                : [...prev.active_levels, level].sort((a, b) => a - b)
+                            }))}
+                          >
+                            {`Level ${level}`}
+                          </Button>
+                        );
+                      })}
+                    </Stack>
                   </Grid>
                 </Grid>
 
@@ -481,6 +509,7 @@ export default function DashboardPage({ pathname = '/editor', search = '', onNav
               readOnly
               showScaleChip={false}
               helperText={false}
+              activeLevels={project.active_levels}
             />
           </Box>
 
