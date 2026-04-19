@@ -4,52 +4,60 @@ function normalizeText(value) {
   return String(value || '').trim();
 }
 
-export async function onRequest(context) {
+export async function onRequestGet(context) {
   const auth = await requirePermission(context, 'reference:manage');
   if (auth.error) return auth.error;
 
   const db = context.env.CAMERA_DB;
-  const method = context.request.method;
-  const body = ['POST', 'PUT', 'DELETE'].includes(method) ? await readJson(context.request) : null;
+  const rows = await db.prepare('SELECT id, name, sort_order FROM camera_types ORDER BY sort_order, name').all();
+  return json({ items: rows.results || [] });
+}
 
-  if (method === 'GET') {
-    const rows = await db.prepare('SELECT id, name, sort_order FROM camera_types ORDER BY sort_order, name').all();
-    return json({ items: rows.results || [] });
-  }
+export async function onRequestPost(context) {
+  const auth = await requirePermission(context, 'reference:manage');
+  if (auth.error) return auth.error;
 
-  if (method === 'POST') {
-    const name = normalizeText(body?.name);
-    if (!name) return badRequest('name is required');
+  const body = await readJson(context.request);
+  const name = normalizeText(body?.name);
+  if (!name) return badRequest('name is required');
 
-    await db.prepare('INSERT INTO camera_types (name, sort_order) VALUES (?1, ?2)')
-      .bind(name, 100)
-      .run();
+  const db = context.env.CAMERA_DB;
+  await db.prepare('INSERT INTO camera_types (name, sort_order) VALUES (?1, ?2)')
+    .bind(name, 100)
+    .run();
 
-    return json({ ok: true });
-  }
+  return json({ ok: true });
+}
 
-  if (method === 'PUT') {
-    const id = Number(body?.id);
-    const name = normalizeText(body?.name);
-    if (!id || !name) return badRequest('id and name are required');
+export async function onRequestPut(context) {
+  const auth = await requirePermission(context, 'reference:manage');
+  if (auth.error) return auth.error;
 
-    await db.prepare('UPDATE camera_types SET name = ?1 WHERE id = ?2')
-      .bind(name, id)
-      .run();
+  const body = await readJson(context.request);
+  const id = Number(body?.id);
+  const name = normalizeText(body?.name);
+  if (!id || !name) return badRequest('id and name are required');
 
-    return json({ ok: true });
-  }
+  const db = context.env.CAMERA_DB;
+  await db.prepare('UPDATE camera_types SET name = ?1 WHERE id = ?2')
+    .bind(name, id)
+    .run();
 
-  if (method === 'DELETE') {
-    const id = Number(body?.id);
-    if (!id) return badRequest('id is required');
+  return json({ ok: true });
+}
 
-    await db.prepare('DELETE FROM camera_types WHERE id = ?1')
-      .bind(id)
-      .run();
+export async function onRequestDelete(context) {
+  const auth = await requirePermission(context, 'reference:manage');
+  if (auth.error) return auth.error;
 
-    return json({ ok: true });
-  }
+  const body = await readJson(context.request);
+  const id = Number(body?.id);
+  if (!id) return badRequest('id is required');
 
-  return json({ error: 'Method not allowed' }, { status: 405 });
+  const db = context.env.CAMERA_DB;
+  await db.prepare('DELETE FROM camera_types WHERE id = ?1')
+    .bind(id)
+    .run();
+
+  return json({ ok: true });
 }
