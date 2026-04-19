@@ -221,18 +221,18 @@ export default function PlannerCanvas({
                   <Box
                     sx={{
                       position: 'absolute',
-                      top: -5,
-                      right: -5,
-                      minWidth: 24,
-                      height: 24,
-                      px: 0.5,
+                      top: -2,
+                      right: -2,
+                      minWidth: 16,
+                      height: 16,
+                      px: 0.2,
                       borderRadius: '8px',
                       bgcolor: selected ? 'primary.main' : 'error.main',
                       display: 'grid',
                       placeItems: 'center',
-                      fontSize: 12,
-                      fontWeight: 800,
-                      border: '2px solid rgba(255,255,255,0.92)'
+                      fontSize: 7,
+                      fontWeight: 600,
+                      border: '1px solid rgba(255,255,255,0.92)'
                     }}
                   >
                     {index + 1}
