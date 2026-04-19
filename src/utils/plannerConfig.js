@@ -1,5 +1,5 @@
 export const CAMERA_TYPES = ['BMD URSA G2', 'Panasonic', 'BMD Micro', 'BMD Studio', 'Sony FX6', 'Sony FX3'];
-export const LENSES = ['Fuji UA23', 'Fuji HA23', 'Fuji HA14', 'Fuji UA14', 'Fuji Xa20', 'Fuji LA16', 'G X Vario PZ 14-42'];
+export const LENSES = ['Fuji UA23', 'Fuji HA23', 'Fuji HA14', 'Fuji UA14', 'Fuji Xa20', 'Fuji LA16', 'G X Vario PZ 14-42' , 'Box Lens' ];
 export const PURPOSES = ['Main', 'Close-Up', 'LG', 'RG', 'LOS', 'ROS', 'LP', 'RP', 'Reverse', 'Handheld', 'Drone', 'LBG', 'RBG', 'Wide Beauty', 'RRA', 'SSLM'];
 
 export const PICTURES = [

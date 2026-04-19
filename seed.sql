@@ -37,4 +37,4 @@ INSERT OR IGNORE INTO camera_purposes (name, sort_order) VALUES
 
 INSERT OR IGNORE INTO lenses (name, sort_order) VALUES
 ('Fuji UA23', 1), ('Fuji HA23', 2), ('Fuji HA14', 3), ('Fuji UA14', 4),
-('Fuji Xa20', 5), ('Fuji LA16', 6), ('G X Vario PZ 14-42', 7);
+('Fuji Xa20', 5), ('Fuji LA16', 6), ('G X Vario PZ 14-42', 7) , ('Box Lens');
