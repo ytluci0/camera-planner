@@ -185,6 +185,7 @@ export default function DashboardPage({
   const [status, setStatus] = useState("Starter loaded.");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showCones, setShowCones] = useState(true);
 
   const titleLine = useMemo(
     () =>
@@ -711,6 +712,14 @@ export default function DashboardPage({
                   >
                     Export PDF
                   </Button>
+
+                  <Button
+                    variant={showCones ? "contained" : "outlined"}
+                    onClick={() => setShowCones((prev) => !prev)}
+                  >
+                    {showCones ? "Hide Cones" : "Show Cones"}
+                  </Button>
+
                   <Button
                     startIcon={<ShareRoundedIcon />}
                     variant="outlined"
@@ -866,6 +875,7 @@ export default function DashboardPage({
               showScaleChip={false}
               helperText={false}
               activeLevels={project.active_levels}
+              showCones={showCones}
             />
           </Box>
 

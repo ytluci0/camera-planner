@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { alpha } from '@mui/material/styles';
-import { Box, Chip, Stack, Typography } from '@mui/material';
-import SportField from './SportField';
-import { SPORT_PRESETS, pictureInfo } from '../utils/plannerConfig';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { alpha } from "@mui/material/styles";
+import { Box, Chip, Stack, Typography } from "@mui/material";
+import SportField from "./SportField";
+import { SPORT_PRESETS, pictureInfo } from "../utils/plannerConfig";
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -12,24 +12,34 @@ function getConeAngle(camera) {
 }
 
 export default function PlannerCanvas({
-  sport = 'football',
-  cameras = [],
+  sport,
+  cameras,
   selectedId,
-  setSelectedId = () => {},
-  setCameras = () => {},
-  scale = 1,
-  readOnly = false,
-  showScaleChip = true,
-  helperText = true,
-  activeLevels = []
+  setSelectedId,
+  setCameras,
+  scale,
+  readOnly,
+  showScaleChip,
+  helperText,
+  activeLevels,
+  showCones = true
 }) {
   const ref = useRef(null);
   const previewRef = useRef(null);
   const preset = SPORT_PRESETS[sport] || SPORT_PRESETS.football;
-  const dragRef = useRef({ id: null, pointerId: null, frame: null, lastClientX: 0, lastClientY: 0 });
+  const dragRef = useRef({
+    id: null,
+    pointerId: null,
+    frame: null,
+    lastClientX: 0,
+    lastClientY: 0
+  });
   const [dragPreview, setDragPreview] = useState(null);
 
-  const aspectPadding = useMemo(() => `${(preset.height / preset.width) * 100}%`, [preset.height, preset.width]);
+  const aspectPadding = useMemo(
+    () => `${(preset.height / preset.width) * 100}%`,
+    [preset.height, preset.width]
+  );
   const scalePct = Math.round((Number(scale) || 1) * 100);
   const stageScale = clamp(Number(scale) || 1, 0.75, 1.35);
 
@@ -45,7 +55,10 @@ export default function PlannerCanvas({
 
   const flushDragFrame = () => {
     dragRef.current.frame = null;
-    const point = eventToPercent(dragRef.current.lastClientX, dragRef.current.lastClientY);
+    const point = eventToPercent(
+      dragRef.current.lastClientX,
+      dragRef.current.lastClientY
+    );
     if (!point || !dragRef.current.id) return;
     previewRef.current = { id: dragRef.current.id, ...point };
     setDragPreview(previewRef.current);
@@ -73,20 +86,35 @@ export default function PlannerCanvas({
       dragRef.current.frame = null;
     }
 
-    const finalPoint = id ? eventToPercent(dragRef.current.lastClientX, dragRef.current.lastClientY) || previewRef.current : null;
+    const finalPoint = id
+      ? eventToPercent(
+          dragRef.current.lastClientX,
+          dragRef.current.lastClientY
+        ) || previewRef.current
+      : null;
 
     if (!readOnly && id && finalPoint) {
-      setCameras((prev) => prev.map((cam) => (
-        cam.id === id && !cam.locked ? { ...cam, x: finalPoint.x, y: finalPoint.y } : cam
-      )));
+      setCameras((prev) =>
+        prev.map((cam) =>
+          cam.id === id && !cam.locked
+            ? { ...cam, x: finalPoint.x, y: finalPoint.y }
+            : cam
+        )
+      );
     }
 
-    dragRef.current = { id: null, pointerId: null, frame: null, lastClientX: 0, lastClientY: 0 };
+    dragRef.current = {
+      id: null,
+      pointerId: null,
+      frame: null,
+      lastClientX: 0,
+      lastClientY: 0
+    };
     previewRef.current = null;
     setDragPreview(null);
-    window.removeEventListener('pointermove', handleWindowPointerMove);
-    window.removeEventListener('pointerup', stopDragging);
-    window.removeEventListener('pointercancel', stopDragging);
+    window.removeEventListener("pointermove", handleWindowPointerMove);
+    window.removeEventListener("pointerup", stopDragging);
+    window.removeEventListener("pointercancel", stopDragging);
   };
 
   const onPointerDown = (event, id) => {
@@ -103,64 +131,82 @@ export default function PlannerCanvas({
       previewRef.current = { id, ...point };
       setDragPreview(previewRef.current);
     }
-    window.addEventListener('pointermove', handleWindowPointerMove, { passive: true });
-    window.addEventListener('pointerup', stopDragging);
-    window.addEventListener('pointercancel', stopDragging);
+    window.addEventListener("pointermove", handleWindowPointerMove, {
+      passive: true
+    });
+    window.addEventListener("pointerup", stopDragging);
+    window.addEventListener("pointercancel", stopDragging);
   };
 
-  useEffect(() => () => {
-    stopDragging();
-  }, []);
+  useEffect(
+    () => () => {
+      stopDragging();
+    },
+    []
+  );
 
-  const liveCameras = cameras.map((cam) => (
-    !readOnly && dragPreview && dragPreview.id === cam.id ? { ...cam, x: dragPreview.x, y: dragPreview.y } : cam
-  ));
+  const liveCameras = cameras.map((cam) =>
+    !readOnly && dragPreview && dragPreview.id === cam.id
+      ? { ...cam, x: dragPreview.x, y: dragPreview.y }
+      : cam
+  );
 
   return (
     <Box>
-      <Stack direction="row" spacing={1} sx={{ mb: 1.25, flexWrap: 'wrap' }}>
-        <Chip label={`Sport: ${preset.name}`} color="primary" variant="outlined" />
+      <Stack direction="row" spacing={1} sx={{ mb: 1.25, flexWrap: "wrap" }}>
+        <Chip
+          label={`Sport: ${preset.name}`}
+          color="primary"
+          variant="outlined"
+        />
         <Chip label={`${cameras.length} Cameras`} variant="outlined" />
-        {showScaleChip ? <Chip label={`Scale ${scalePct}%`} variant="outlined" /> : null}
+        {showScaleChip ? (
+          <Chip label={`Scale ${scalePct}%`} variant="outlined" />
+        ) : null}
       </Stack>
 
       <Box
         sx={{
-          width: '100%',
-          maxWidth: '1280px',
-          mx: 'auto',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          width: "100%",
+          maxWidth: "1280px",
+          mx: "auto",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           py: 0.5
         }}
       >
         <Box
           sx={{
-            position: 'relative',
-            width: '100%',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            bgcolor: alpha('#061120', 0.88),
-            border: `1px solid ${alpha('#ffffff', 0.12)}`,
-            boxShadow: `0 18px 44px ${alpha('#000000', 0.28)}`
+            position: "relative",
+            width: "100%",
+            borderRadius: "16px",
+            overflow: "hidden",
+            bgcolor: alpha("#061120", 0.88),
+            border: `1px solid ${alpha("#ffffff", 0.12)}`,
+            boxShadow: `0 18px 44px ${alpha("#000000", 0.28)}`
           }}
         >
           <Box sx={{ pt: aspectPadding }} />
           <Box
             ref={ref}
             sx={{
-              position: 'absolute',
+              position: "absolute",
               inset: 0,
-              userSelect: 'none',
-              touchAction: 'none',
+              userSelect: "none",
+              touchAction: "none",
               transform: `scale(${stageScale})`,
-              transformOrigin: 'center center'
+              transformOrigin: "center center"
             }}
           >
             <SportField sport={sport} activeLevels={activeLevels} />
 
-            <svg width="100%" height="100%" viewBox={`0 0 ${preset.width} ${preset.height}`} style={{ position: 'absolute', inset: 0 }}>
+            <svg
+              width="100%"
+              height="100%"
+              viewBox={`0 0 ${preset.width} ${preset.height}`}
+              style={{ position: "absolute", inset: 0 }}
+            >
               {liveCameras.map((cam) => {
                 const x = (cam.x / 100) * preset.width;
                 const y = (cam.y / 100) * preset.height;
@@ -175,7 +221,15 @@ export default function PlannerCanvas({
                 const y2 = y + radius * Math.sin(b);
                 const mid = (angle * Math.PI) / 180;
                 const d = `M ${x} ${y} L ${x1} ${y1} Q ${x + radius * 0.92 * Math.cos(mid)} ${y + radius * 0.92 * Math.sin(mid)} ${x2} ${y2} Z`;
-                return <path key={`${cam.id}-cone`} d={d} fill="rgba(220,220,220,0.18)" stroke="rgba(255,255,255,0.20)" strokeWidth="1.5" />;
+                return showCones ? (
+                  <path
+                    key={`${cam.id}-cone`}
+                    d={d}
+                    fill="rgba(220,220,220,0.18)"
+                    stroke="rgba(255,255,255,0.20)"
+                    strokeWidth="1.5"
+                  />
+                ) : null;
               })}
             </svg>
 
@@ -190,19 +244,29 @@ export default function PlannerCanvas({
                   onPointerDown={(event) => onPointerDown(event, cam.id)}
                   onClick={() => setSelectedId(cam.id)}
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     left: `${cam.x}%`,
                     top: `${cam.y}%`,
-                    width: sport === 'football' ? 34 : 40,
-                    height: sport === 'football' ? 34 : 40,
-                    transform: 'translate(-50%, -50%)',
-                    borderRadius: '50%',
-                    cursor: readOnly ? 'pointer' : cam.locked ? 'default' : isDragging ? 'grabbing' : 'grab',
-                    border: `2px solid ${selected ? '#6ee7ff' : 'rgba(255,255,255,0.14)'}`,
-                    background: alpha('#0b1220', selected ? 0.86 : 0.6),
-                    boxShadow: selected ? `0 0 32px ${alpha('#6ee7ff', 0.42)}` : '0 10px 20px rgba(0,0,0,0.28)',
-                    transition: isDragging ? 'none' : 'box-shadow 140ms ease, border-color 140ms ease',
-                    willChange: readOnly ? 'auto' : 'left, top',
+                    width: sport === "football" ? 34 : 40,
+                    height: sport === "football" ? 34 : 40,
+                    transform: "translate(-50%, -50%)",
+                    borderRadius: "50%",
+                    cursor: readOnly
+                      ? "pointer"
+                      : cam.locked
+                        ? "default"
+                        : isDragging
+                          ? "grabbing"
+                          : "grab",
+                    border: `2px solid ${selected ? "#6ee7ff" : "rgba(255,255,255,0.14)"}`,
+                    background: alpha("#0b1220", selected ? 0.86 : 0.6),
+                    boxShadow: selected
+                      ? `0 0 32px ${alpha("#6ee7ff", 0.42)}`
+                      : "0 10px 20px rgba(0,0,0,0.28)",
+                    transition: isDragging
+                      ? "none"
+                      : "box-shadow 140ms ease, border-color 140ms ease",
+                    willChange: readOnly ? "auto" : "left, top",
                     zIndex: selected ? 3 : 2
                   }}
                 >
@@ -211,28 +275,28 @@ export default function PlannerCanvas({
                     src={picture.file}
                     alt={picture.name}
                     sx={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
                       p: 0.45,
-                      transform: cam.mirror ? 'scaleX(-1)' : 'none'
+                      transform: cam.mirror ? "scaleX(-1)" : "none"
                     }}
                   />
                   <Box
                     sx={{
-                      position: 'absolute',
+                      position: "absolute",
                       top: -2,
                       right: -2,
                       minWidth: 16,
                       height: 16,
                       px: 0.2,
-                      borderRadius: '8px',
-                      bgcolor: selected ? 'primary.main' : 'error.main',
-                      display: 'grid',
-                      placeItems: 'center',
+                      borderRadius: "8px",
+                      bgcolor: selected ? "primary.main" : "error.main",
+                      display: "grid",
+                      placeItems: "center",
                       fontSize: 7,
                       fontWeight: 600,
-                      border: '1px solid rgba(255,255,255,0.92)'
+                      border: "1px solid rgba(255,255,255,0.92)"
                     }}
                   >
                     {index + 1}
@@ -245,8 +309,13 @@ export default function PlannerCanvas({
       </Box>
 
       {helperText ? (
-        <Typography variant="caption" sx={{ display: 'block', mt: 1.25, color: 'text.secondary' }}>
-          {readOnly ? 'Viewer mode: field and camera overview only.' : 'Drag cameras directly on the field. Releasing now keeps the camera in the dropped position.'}
+        <Typography
+          variant="caption"
+          sx={{ display: "block", mt: 1.25, color: "text.secondary" }}
+        >
+          {readOnly
+            ? "Viewer mode: field and camera overview only."
+            : "Drag cameras directly on the field. Releasing now keeps the camera in the dropped position."}
         </Typography>
       ) : null}
     </Box>
