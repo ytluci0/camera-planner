@@ -45,15 +45,16 @@ export default function ViewerPage({ search = '', onNavigate = () => {} }) {
         const loaded = data.project;
         const cameras = loaded.payload_json?.cameras || [];
         setProject({
-          id: loaded.id,
-          name: loaded.name,
-          event_date: loaded.event_date || '',
-          event_time: loaded.event_time || '',
-          sport_type: loaded.payload_json?.sport_type || loaded.sport_type || 'football',
-          pitch_scale: loaded.payload_json?.pitch_scale || 1,
-          cameras,
-          notes: loaded.payload_json?.notes || ''
-        });
+  id: loaded.id,
+  name: loaded.name,
+  event_date: loaded.event_date || '',
+  event_time: loaded.event_time || '',
+  sport_type: loaded.payload_json?.sport_type || loaded.sport_type || 'football',
+  pitch_scale: loaded.payload_json?.pitch_scale || 1,
+  activeLevels: loaded.payload_json?.activeLevels || [1, 2, 3],
+  cameras,
+  notes: loaded.payload_json?.notes || ''
+});
         setSelectedId(cameras[0]?.id || null);
       } catch (err) {
         setError(err.message);
@@ -119,14 +120,15 @@ export default function ViewerPage({ search = '', onNavigate = () => {} }) {
           <Card sx={{ ...panelSx, mb: 2.5 }}>
             <CardContent>
               <PlannerCanvas
-                sport={project.sport_type}
-                cameras={project.cameras}
-                selectedId={selectedId}
-                setSelectedId={setSelectedId}
-                setCameras={() => {}}
-                scale={project.pitch_scale}
-                readOnly
-              />
+  sport={project.sport_type}
+  cameras={project.cameras}
+  selectedId={selectedId}
+  setSelectedId={setSelectedId}
+  setCameras={() => {}}
+  scale={project.pitch_scale}
+  readOnly
+  activeLevels={project.activeLevels}
+/>
             </CardContent>
           </Card>
 
