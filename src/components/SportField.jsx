@@ -4,24 +4,24 @@ function levelRects(width, height, activeLevels = []) {
   const levels = [
     {
       id: 1,
-      padX: 80,
-      padY: 80,
-      fill: "rgba(120, 120, 120, 0.18)",
-      stroke: "rgba(30, 30, 30, 0.55)"
+      padX: 18,
+      padY: 18,
+      fill: "rgba(120, 120, 120, 0.16)",
+      stroke: "rgba(30, 30, 30, 0.45)"
     },
     {
       id: 2,
-      padX: 160,
-      padY: 160,
-      fill: "rgba(100, 100, 100, 0.22)",
-      stroke: "rgba(20, 20, 20, 0.6)"
+      padX: 42,
+      padY: 42,
+      fill: "rgba(100, 100, 100, 0.18)",
+      stroke: "rgba(20, 20, 20, 0.50)"
     },
     {
       id: 3,
-      padX: 260,
-      padY: 260,
-      fill: "rgba(80, 80, 80, 0.26)",
-      stroke: "rgba(10, 10, 10, 0.65)"
+      padX: 72,
+      padY: 72,
+      fill: "rgba(80, 80, 80, 0.20)",
+      stroke: "rgba(10, 10, 10, 0.55)"
     }
   ].filter((item) => activeLevels.includes(item.id));
 
@@ -242,11 +242,11 @@ export default function SportField({ sport, activeLevels = [] }) {
         ? handballMarkup(activeLevels)
         : footballMarkup(activeLevels);
   const viewBox =
-    sport === "basketball"
-      ? "-120 -90 1180 680"
-      : sport === "handball"
-        ? "-200 -160 1300 900"
-        : "-300 -250 1800 1200";
+  sport === "basketball"
+    ? "-90 -60 1120 620"
+    : sport === "handball"
+      ? "-85 -55 970 520"
+      : "-90 -60 1180 680";
 
   return (
     <svg
