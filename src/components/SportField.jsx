@@ -4,44 +4,63 @@ function levelRects(width, height, activeLevels = []) {
   const levels = [
     {
       id: 1,
-      padX: 80,
-      padY: 80,
-      fill: "rgba(120, 120, 120, 0.16)",
-      stroke: "rgba(30, 30, 30, 0.45)"
+      padX: 70,
+      padY: 70,
+      fill: "rgba(120, 120, 120, 0.18)",
+      stroke: "rgba(255, 255, 255, 0.06)"
     },
     {
       id: 2,
-      padX: 200,
-      padY: 200,
-      fill: "rgba(100, 100, 100, 0.18)",
-      stroke: "rgba(20, 20, 20, 0.50)"
+      padX: 160,
+      padY: 160,
+      fill: "rgba(90, 90, 90, 0.22)",
+      stroke: "rgba(255, 255, 255, 0.05)"
     },
     {
       id: 3,
-      padX: 330,
-      padY: 330,
-      fill: "rgba(80, 80, 80, 0.20)",
-      stroke: "rgba(10, 10, 10, 0.55)"
+      padX: 280,
+      padY: 280,
+      fill: "rgba(65, 65, 65, 0.26)",
+      stroke: "rgba(255, 255, 255, 0.04)"
     }
   ].filter((item) => activeLevels.includes(item.id));
 
-  return levels.map((level) => {
-    const x = 2 - level.padX;
-    const y = 2 - level.padY;
-    const rectWidth = width - 4 + level.padX * 2;
-    const rectHeight = height - 4 + level.padY * 2;
+  return levels.map((level, index) => {
+    const prevPadX = index === 0 ? 0 : levels[index - 1].padX;
+    const prevPadY = index === 0 ? 0 : levels[index - 1].padY;
+
+    const outerX = 2 - level.padX;
+    const outerY = 2 - level.padY;
+    const outerW = width - 4 + level.padX * 2;
+    const outerH = height - 4 + level.padY * 2;
+
+    const innerX = 2 - prevPadX;
+    const innerY = 2 - prevPadY;
+    const innerW = width - 4 + prevPadX * 2;
+    const innerH = height - 4 + prevPadY * 2;
+
+    const path = `
+      M ${outerX} ${outerY}
+      H ${outerX + outerW}
+      V ${outerY + outerH}
+      H ${outerX}
+      Z
+
+      M ${innerX} ${innerY}
+      H ${innerX + innerW}
+      V ${innerY + innerH}
+      H ${innerX}
+      Z
+    `;
 
     return (
-      <rect
+      <path
         key={`level-${level.id}`}
-        x={x}
-        y={y}
-        width={rectWidth}
-        height={rectHeight}
-        rx="8"
+        d={path}
         fill={level.fill}
         stroke={level.stroke}
-        strokeWidth="1.5"
+        strokeWidth="1.2"
+        fillRule="evenodd"
       />
     );
   });
