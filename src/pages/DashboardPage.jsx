@@ -36,7 +36,7 @@ import { useAuth } from '../context/AuthContext';
 
 const NAV_ITEMS = [
   { key: 'editor', path: '/editor', label: 'Editor' },
-  { key: 'admin', path: '/admin', label: 'Admin' },
+  { key: 'database', path: '/admin/database', label: 'Database' },
   { key: 'projects', path: '/projects', label: 'Projects' }
 ];
 

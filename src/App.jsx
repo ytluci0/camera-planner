@@ -13,11 +13,12 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ViewerPage from './pages/ViewerPage';
+import AdminDatabasePage from './pages/AdminDatabasePage';
 import { useAuth } from './context/AuthContext';
 
 const NAV_ITEMS = [
   { key: 'editor', path: '/editor', label: 'Editor' },
-  { key: 'admin', path: '/admin', label: 'Admin' },
+  { key: 'database', path: '/admin/database', label: 'Database' },
   { key: 'projects', path: '/projects', label: 'Projects' }
 ];
 
@@ -80,6 +81,7 @@ export default function App() {
   }, []);
 
   const page = useMemo(() => {
+    if (route.pathname.startsWith('/admin/database')) return 'database';
     if (route.pathname.startsWith('/admin')) return 'admin';
     if (route.pathname.startsWith('/projects')) return 'projects';
     if (route.pathname.startsWith('/viewer')) return 'viewer';
@@ -95,6 +97,10 @@ export default function App() {
   }
 
   if (!user) return <LoginPage />;
+
+  if (page === 'database') {
+    return <AdminDatabasePage onNavigate={navigateTo} />;
+  }
 
   if (page === 'admin') {
     return <PlaceholderPage title="Admin" description="Admin tools placeholder." onNavigate={navigateTo} />;

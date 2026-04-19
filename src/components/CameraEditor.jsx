@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -17,10 +17,62 @@ import {
   Typography
 } from '@mui/material';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
-import { CAMERA_TYPES, LENSES, PICTURES, PURPOSES, pictureInfo } from '../utils/plannerConfig';
+import { CAMERA_TYPES, LENSES, PICTURES, PURPOSES } from '../utils/plannerConfig';
+import { api } from '../utils/api';
 import { glass } from '../theme';
 
+function normalizeReferenceData(data) {
+  return {
+    purposes: Array.isArray(data?.cameraPurposes) && data.cameraPurposes.length
+      ? data.cameraPurposes.map((item) => item.name)
+      : PURPOSES,
+    cameraTypes: Array.isArray(data?.cameraTypes) && data.cameraTypes.length
+      ? data.cameraTypes.map((item) => item.name)
+      : CAMERA_TYPES,
+    lenses: Array.isArray(data?.lenses) && data.lenses.length
+      ? data.lenses.map((item) => item.name)
+      : LENSES,
+    pictures: Array.isArray(data?.pictures) && data.pictures.length
+      ? data.pictures
+      : PICTURES
+  };
+}
+
 export default function CameraEditor({ camera, index, onChange, onDelete }) {
+  const [refs, setRefs] = useState({
+    purposes: PURPOSES,
+    cameraTypes: CAMERA_TYPES,
+    lenses: LENSES,
+    pictures: PICTURES
+  });
+
+  useEffect(() => {
+    let mounted = true;
+
+    api.get('/api/reference')
+      .then((data) => {
+        if (!mounted) return;
+        setRefs(normalizeReferenceData(data));
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setRefs({
+          purposes: PURPOSES,
+          cameraTypes: CAMERA_TYPES,
+          lenses: LENSES,
+          pictures: PICTURES
+        });
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const picture = useMemo(() => {
+    return refs.pictures.find((item) => item.id === camera?.picture) || PICTURES.find((item) => item.id === camera?.picture) || refs.pictures[0] || PICTURES[0];
+  }, [camera?.picture, refs.pictures]);
+
   if (!camera) {
     return (
       <Card sx={{ ...glass('#6ee7ff', 0.12), borderRadius: 3, background: 'linear-gradient(180deg, rgba(16,38,64,0.92) 0%, rgba(7,20,38,0.97) 100%)' }}>
@@ -31,8 +83,6 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
       </Card>
     );
   }
-
-  const picture = pictureInfo(camera.picture);
 
   return (
     <Stack spacing={2}>
@@ -53,7 +103,7 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
               <FormControl fullWidth>
                 <InputLabel>Purpose</InputLabel>
                 <Select label="Purpose" value={camera.purpose} onChange={(e) => onChange('purpose', e.target.value)}>
-                  {PURPOSES.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                  {refs.purposes.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
@@ -61,7 +111,7 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
               <FormControl fullWidth>
                 <InputLabel>Camera Type</InputLabel>
                 <Select label="Camera Type" value={camera.cameraType} onChange={(e) => onChange('cameraType', e.target.value)}>
-                  {CAMERA_TYPES.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                  {refs.cameraTypes.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
@@ -69,7 +119,7 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
               <FormControl fullWidth>
                 <InputLabel>Lens</InputLabel>
                 <Select label="Lens" value={camera.lens} onChange={(e) => onChange('lens', e.target.value)}>
-                  {LENSES.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                  {refs.lenses.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
@@ -77,7 +127,7 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
               <FormControl fullWidth>
                 <InputLabel>Picture</InputLabel>
                 <Select label="Picture" value={camera.picture} onChange={(e) => onChange('picture', e.target.value)}>
-                  {PICTURES.map((item) => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
+                  {refs.pictures.map((item) => <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>
@@ -85,8 +135,8 @@ export default function CameraEditor({ camera, index, onChange, onDelete }) {
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }}>
                 <Box
                   component="img"
-                  src={picture.file}
-                  alt={picture.name}
+                  src={picture?.file}
+                  alt={picture?.name || 'Camera picture'}
                   sx={{
                     width: 78,
                     height: 78,
