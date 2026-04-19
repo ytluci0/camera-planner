@@ -311,7 +311,7 @@ export default function AdminDatabasePage({ onNavigate = () => {} }) {
     setLoading(true);
     setError('');
     try {
-      const data = await api.get('/api/admin/reference');
+      const data = await api.get('/api/reference');
       setRefs({
         cameraTypes: data.cameraTypes || [],
         cameraPurposes: data.cameraPurposes || [],
