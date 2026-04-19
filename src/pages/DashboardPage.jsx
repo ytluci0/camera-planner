@@ -382,51 +382,24 @@ export default function DashboardPage({
     const imgData = canvas.toDataURL("image/png");
 
     const pdf = new jsPDF({
-      orientation: "landscape",
-      unit: "mm",
-      format: "a4",
+      orientation: canvas.width >= canvas.height ? "landscape" : "portrait",
+      unit: "px",
+      format: [canvas.width, canvas.height],
       compress: true
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 6;
-    const usableWidth = pageWidth - margin * 2;
-    const usableHeight = pageHeight - margin * 2;
-
-    const imgWidth = usableWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = margin;
-
+    pdf.setFillColor(7, 17, 31);
+    pdf.rect(0, 0, canvas.width, canvas.height, "F");
     pdf.addImage(
       imgData,
       "PNG",
-      margin,
-      position,
-      imgWidth,
-      imgHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
       undefined,
       "FAST"
     );
-    heightLeft -= usableHeight;
-
-    while (heightLeft > 0) {
-      position = margin - (imgHeight - heightLeft);
-      pdf.addPage();
-      pdf.addImage(
-        imgData,
-        "PNG",
-        margin,
-        position,
-        imgWidth,
-        imgHeight,
-        undefined,
-        "FAST"
-      );
-      heightLeft -= usableHeight;
-    }
 
     pdf.save(`${project.name || "camera-plan"}.pdf`);
     setStatus("PDF exported.");
