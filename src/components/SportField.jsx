@@ -11,15 +11,15 @@ function levelRects(width, height, activeLevels = []) {
     },
     {
       id: 2,
-      padX: 160,
-      padY: 160,
+      padX: 200,
+      padY: 200,
       fill: "rgba(100, 100, 100, 0.18)",
       stroke: "rgba(20, 20, 20, 0.50)"
     },
     {
       id: 3,
-      padX: 250,
-      padY: 250,
+      padX: 330,
+      padY: 330,
       fill: "rgba(80, 80, 80, 0.20)",
       stroke: "rgba(10, 10, 10, 0.55)"
     }
