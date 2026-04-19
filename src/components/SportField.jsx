@@ -1,72 +1,58 @@
 import React from "react";
 
-function levelRects(width, height, activeLevels = []) {
-  const allLevels = [
-    {
-      id: 1,
-      padX: 70,
-      padY: 70,
-      fill: "rgba(120, 120, 120, 0.18)",
-      stroke: "rgba(255, 255, 255, 0.10)"
-    },
-    {
-      id: 2,
-      padX: 160,
-      padY: 160,
-      fill: "rgba(95, 95, 95, 0.22)",
-      stroke: "rgba(255, 255, 255, 0.08)"
-    },
-    {
-      id: 3,
-      padX: 280,
-      padY: 280,
-      fill: "rgba(70, 70, 70, 0.26)",
-      stroke: "rgba(255, 255, 255, 0.06)"
-    }
-  ];
+const LEVEL_DEFS = [
+  {
+    id: 1,
+    padX: 70,
+    padY: 70,
+    fill: "rgba(120, 120, 120, 0.18)",
+    stroke: "rgba(255, 255, 255, 0.10)"
+  },
+  {
+    id: 2,
+    padX: 170,
+    padY: 170,
+    fill: "rgba(95, 95, 95, 0.22)",
+    stroke: "rgba(255, 255, 255, 0.08)"
+  },
+  {
+    id: 3,
+    padX: 300,
+    padY: 300,
+    fill: "rgba(70, 70, 70, 0.26)",
+    stroke: "rgba(255, 255, 255, 0.06)"
+  }
+];
 
-  return allLevels
+function getActiveLevels(activeLevels = []) {
+  return LEVEL_DEFS
     .filter((level) => activeLevels.includes(level.id))
-    .sort((a, b) => b.id - a.id)
-    .map((level) => {
-      const prevLevel = allLevels.find((l) => l.id === level.id - 1);
-      const innerPadX = prevLevel ? prevLevel.padX : 0;
-      const innerPadY = prevLevel ? prevLevel.padY : 0;
+    .sort((a, b) => b.id - a.id); // outer first, inner last
+}
 
-      const outerX = 2 - level.padX;
-      const outerY = 2 - level.padY;
-      const outerW = width - 4 + level.padX * 2;
-      const outerH = height - 4 + level.padY * 2;
+function levelRects(width, height, activeLevels = []) {
+  const levels = getActiveLevels(activeLevels);
 
-      const innerX = 2 - innerPadX;
-      const innerY = 2 - innerPadY;
-      const innerW = width - 4 + innerPadX * 2;
-      const innerH = height - 4 + innerPadY * 2;
+  return levels.map((level) => {
+    const x = 2 - level.padX;
+    const y = 2 - level.padY;
+    const rectWidth = width - 4 + level.padX * 2;
+    const rectHeight = height - 4 + level.padY * 2;
 
-      const d = [
-        `M ${outerX} ${outerY}`,
-        `H ${outerX + outerW}`,
-        `V ${outerY + outerH}`,
-        `H ${outerX}`,
-        "Z",
-        `M ${innerX} ${innerY}`,
-        `H ${innerX + innerW}`,
-        `V ${innerY + innerH}`,
-        `H ${innerX}`,
-        "Z"
-      ].join(" ");
-
-      return (
-        <path
-          key={`level-${level.id}`}
-          d={d}
-          fill={level.fill}
-          stroke={level.stroke}
-          strokeWidth="1.2"
-          fillRule="evenodd"
-        />
-      );
-    });
+    return (
+      <rect
+        key={`level-${level.id}`}
+        x={x}
+        y={y}
+        width={rectWidth}
+        height={rectHeight}
+        rx="8"
+        fill={level.fill}
+        stroke={level.stroke}
+        strokeWidth="1.5"
+      />
+    );
+  });
 }
 
 function footballMarkup(activeLevels) {
@@ -272,6 +258,25 @@ function handballMarkup(activeLevels) {
   );
 }
 
+function getSportSize(sport) {
+  if (sport === "basketball") return { width: 940, height: 500 };
+  if (sport === "handball") return { width: 800, height: 400 };
+  return { width: 1000, height: 562.5 };
+}
+
+function getViewBox(sport, activeLevels = []) {
+  const { width, height } = getSportSize(sport);
+
+  const active = LEVEL_DEFS.filter((level) => activeLevels.includes(level.id));
+  const maxPadX = active.length ? Math.max(...active.map((l) => l.padX)) : 0;
+  const maxPadY = active.length ? Math.max(...active.map((l) => l.padY)) : 0;
+
+  const extraX = maxPadX + 30;
+  const extraY = maxPadY + 30;
+
+  return `${-extraX} ${-extraY} ${width + extraX * 2} ${height + extraY * 2}`;
+}
+
 export default function SportField({ sport, activeLevels = [] }) {
   const markup =
     sport === "basketball"
@@ -280,12 +285,7 @@ export default function SportField({ sport, activeLevels = [] }) {
         ? handballMarkup(activeLevels)
         : footballMarkup(activeLevels);
 
-  const viewBox =
-    sport === "basketball"
-      ? "-90 -60 1120 620"
-      : sport === "handball"
-        ? "-85 -55 970 520"
-        : "-90 -60 1180 680";
+  const viewBox = getViewBox(sport, activeLevels);
 
   return (
     <svg
