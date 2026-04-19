@@ -20,8 +20,10 @@ SELECT r.id, p.id FROM roles r JOIN permissions p ON p.code IN ('projects:view')
 
 -- Password below is SHA-256('ChangeMe123!') for starter use only. Replace it before production.
 INSERT OR IGNORE INTO users (name, email, password_hash, role_id)
-SELECT 'Admin User', 'admin@planner.local', '9a4aabf0e5cf71cae2cea646613ce7e2a5919fa758e56819704be25a3a2c1f0b', r.idFROM roles r WHERE r.name = 'admin';
-
+INSERT OR IGNORE INTO users (name, email, password_hash, role_id)
+SELECT 'Admin User', 'admin@planner.local', '9a4aabf0e5cf71cae2cea646613ce7e2a5919fa758e56819704be25a3a2c1f0b', r.id
+FROM roles r
+WHERE r.name = 'admin';
 INSERT OR IGNORE INTO camera_types (name, sort_order) VALUES
 ('BMD URSA G2', 1),
 ('Panasonic', 2),
