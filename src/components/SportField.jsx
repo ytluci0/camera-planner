@@ -3,15 +3,15 @@ import React from "react";
 const LEVEL_DEFS = [
   {
     id: 1,
-    padX: 70,
-    padY: 70,
+    padX: 100,
+    padY: 100,
     fill: "rgba(120, 120, 120, 0.18)",
     stroke: "rgba(255, 255, 255, 0.10)"
   },
   {
     id: 2,
-    padX: 170,
-    padY: 170,
+    padX: 200,
+    padY: 200,
     fill: "rgba(95, 95, 95, 0.22)",
     stroke: "rgba(255, 255, 255, 0.08)"
   },
