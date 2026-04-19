@@ -193,8 +193,8 @@ export default function PlannerCanvas({
                     position: 'absolute',
                     left: `${cam.x}%`,
                     top: `${cam.y}%`,
-                    width: 56,
-                    height: 56,
+                    width: sport === 'football' ? 34 : 40,
+                    height: sport === 'football' ? 34 : 40,
                     transform: 'translate(-50%, -50%)',
                     borderRadius: '50%',
                     cursor: readOnly ? 'pointer' : cam.locked ? 'default' : isDragging ? 'grabbing' : 'grab',
@@ -214,7 +214,7 @@ export default function PlannerCanvas({
                       width: '100%',
                       height: '100%',
                       objectFit: 'contain',
-                      p: 0.75,
+                      p: 0.45,
                       transform: cam.mirror ? 'scaleX(-1)' : 'none'
                     }}
                   />
